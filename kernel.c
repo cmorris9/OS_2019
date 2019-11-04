@@ -2,6 +2,7 @@ void printString(char*);
 void readString(char*);
 void readSector(char*, int);
 void makeInterrupt21(int,int,int,int);
+void readFile(char*);
 
 void main() {
 	int startVidMem = 0xb800;
@@ -10,6 +11,11 @@ void main() {
 	char* letters = "Hello World\0";
 	char* line[80];
 	char* buffer[512];
+	char* fileName[6];
+	
+	int sectorsRead;
+	char* bufferC[13312];
+	
 
 	while(*letters != 0x0) {
 		putInMemory(startVidMem, vidMemOffset, *letters);
@@ -27,10 +33,19 @@ void main() {
 		readSector(buffer, 30);
 		printString(buffer);
 
+		//makeInterrupt21();
+		//interrupt(0x21,1,line,0,0);
+		//interrupt(0x21,0,line,0,0);
+		//while(1);
+
 		makeInterrupt21();
-		interrupt(0x21,1,line,0,0);
-		interrupt(0x21,0,line,0,0);
-		while(1);
+		interrupt(0x21,3,"messag",bufferC, &sectorsRead);
+		if(sectorsRead>0){
+			interrupt(0x21,0,bufferC,0,0); }
+		else {
+			interrupt(0x21,0, "messag not found\r\n",0,0); }
+			
+			while(1);
 }
 
 
@@ -123,11 +138,45 @@ void readString(char* lineLocal)
 			printString("error");
 	}}
 
+	
+
+	void readFile(char* fileName) {
+		
+		int fileEntry;
+		int sectorsRead = 0;
+		int i = 0;
+		int j;
+		char* fileBuffer[512];
+		char* bufferC[13312];
+		readSector(fileBuffer, 2);
+		
+
+	for(fileBuffer[i]; fileBuffer[480]; i = i + 32) {
+		
+		
+		if(fileBuffer[i] == fileName[0] && fileBuffer[i+1] == fileName[1] && fileBuffer[i+2] == fileName[2] && fileBuffer[i+3] == fileName[3] && fileBuffer[i+4] == fileName[4] && fileBuffer[i+5] == fileName[5]) {
+			fileEntry = i;
+			break;
+				}
+		
+		else {
+			
+			sectorsRead = 0;}
+
+
+			sectorsRead+=1;
+
+	for(j = 6; j <32; j++){
+		if(fileBuffer[fileEntry+j] = 0) {
+			break;
+				}
+	readSector(bufferC, fileBuffer[fileEntry+j]);
+		&bufferC+=512;    }
 
 
 
-
-
-
+}		
+		
+}
 
 
