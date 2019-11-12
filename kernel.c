@@ -2,6 +2,7 @@ void printString(char*);
 void readString(char*);
 void readSector(char*, int);
 void makeInterrupt21(int,int,int,int);
+void terminate();
 
 void main() {
 	int startVidMem = 0xb800;
