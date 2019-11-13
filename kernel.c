@@ -2,8 +2,10 @@ void printString(char*);
 void printChar(char*);
 void readString(char*);
 void readSector(char*, int);
+void readFile(char*, char*)
 void makeInterrupt21(int,int,int,int);
 void readFile(char*);
+void ternimate();
 
 void main() 
 {
@@ -167,7 +169,7 @@ void handleInterrupt21(int ax, char* bx, int cx, int dx)
 
 	
 
-void readFile(char* fileName) 
+void readFile(char* fileName, char* file) 
 {
 		
 	int fileEntry;
@@ -212,3 +214,71 @@ void readFile(char* fileName)
 }
 
 
+void readFile(char* filename, char* file)
+{
+
+ 	char dir[512];
+
+ 	int i, entry,matchFound = -1;
+
+ 	readSector(dir,2);
+
+ 	for(entry = 0; entry < 512; entry += 32)
+	{
+
+ 		if(strcomp(dir,filename,entry))
+		{
+
+ 			matchFound = entry + 6;
+
+ 			break;
+
+ 		}
+
+ 	}
+
+
+ 	if(matchFound > -1)
+	{
+
+
+
+ 		while(dir[matchFound] != 0)
+		{
+
+ 			readSector(file,dir[matchFound]);
+
+ 			break;
+
+ 		}
+
+ 	}
+
+
+
+}
+
+
+
+void terminate()
+{
+
+	char shell[6];
+
+	shell[0] = 's';
+
+	shell[1] = 'h';
+
+	shell[2] = 'e';
+
+	shell[3] = 'l';
+
+	shell[4] = 'l';
+
+	shell[5] = '\0';
+
+	executeProgram(shell,2000);
+
+	// while(1);
+
+}
