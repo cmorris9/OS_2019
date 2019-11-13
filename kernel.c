@@ -213,7 +213,7 @@ void readFile(char* fileName, char* file)
 		
 }
 
-
+//Sean Readfile from his commit
 void readFile(char* filename, char* file)
 {
 
