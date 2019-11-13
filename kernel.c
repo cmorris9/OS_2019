@@ -1,6 +1,7 @@
 void printString(char*);
 void readString(char*);
 void readSector(char*, int);
+void readFile(char* filename, char* file);
 void makeInterrupt21(int,int,int,int);
 void terminate();
 
@@ -123,6 +124,47 @@ void readString(char* lineLocal)
 		else { 
 			printString("error");
 	}}
+
+	void readFile(char* filename, char* file){
+
+ 	char dir[512];
+
+ 	int i, entry,matchFound = -1;
+
+ 	readSector(dir,2);
+
+ 	for(entry = 0; entry < 512; entry += 32){
+
+ 		if(strcomp(dir,filename,entry)){
+
+ 			matchFound = entry + 6;
+
+ 			break;
+
+ 		}
+
+ 	}
+
+
+ 	if(matchFound > -1){
+
+
+
+ 		while(dir[matchFound] != 0){
+
+ 			readSector(file,dir[matchFound]);
+
+ 			break;
+
+ 		}
+
+ 	}
+
+
+
+}
+
+
 
 	void terminate(){
 
