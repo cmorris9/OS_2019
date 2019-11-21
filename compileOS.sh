@@ -7,4 +7,4 @@ ld86 -o kernel -d kernel_c.o kernel_asm.o
 ./loadFile kernel
 dd if=message.txt of=diskc.img bs=512 count=1 seek=30 conv=notrunc
 ./loadFile message.txt
-./loadFile testpr1
+./loadFile testpr2

@@ -4,6 +4,7 @@ void readSector(char*, int);
 void makeInterrupt21(int,int,int,int);
 void readFile(char*, char*, int*);
 void executeProgram(char*);
+void terminate();
 
 void main() {
 	int startVidMem = 0xb800;
@@ -46,10 +47,14 @@ void main() {
 			//interrupt(0x21,0, "messag not found\r\n",0,0); }
 			
 			//while(1);
-
-		makeInterrupt21();
-		interrupt(0x21,4,"testpr",0,0);
-		while(1);
+		while(1)
+		{
+		
+		
+			makeInterrupt21();
+			interrupt(0x21,4,"shell.c",0,0);
+			//while(1);
+		}
 }
 
 
@@ -141,6 +146,9 @@ void readString(char* lineLocal)
 		else if(ax == 4) {
 			executeProgram(bx);
 			}
+		else if(ax == 5) {
+			terminate();
+			}
 		else { 
 			printString("error");
 	}}
@@ -181,7 +189,8 @@ void readString(char* lineLocal)
 }}
 }
 
-	void executeProgram(char* name) {
+void executeProgram(char* name) 
+{
 
 		char bufferX[13312];
 		int sectorsRead;
@@ -189,12 +198,28 @@ void readString(char* lineLocal)
 
 		readFile(name, bufferX, &sectorsRead);
 		
-	for(i=0; i < 13312; i++){
+	for(i=0; i < 13312; i++)
+	{
 		putInMemory(0x2000, i, bufferX[i]);
 		
-		}
+	}
 			
-		launchProgram(0x2000);
+	launchProgram(0x2000);
 			
-			}
+}
+
+void terminate()
+{
+	char shell[6];
+	
+	shell[0] = 's';
+	shell[0] = 'h';
+	shell[0] = 'e';
+	shell[0] = 'l';
+	shell[0] = 'l';
+	shell[0] = '\0';
+
+	executeProgram(shell);
+
+}
 

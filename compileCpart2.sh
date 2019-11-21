@@ -1,4 +1,4 @@
-bcc -ansi -c -o testpr1.o testpr1.c
+bcc -ansi -c -o shell.o shell.c
 as86 -o userlib.o userlib.asm
-ld86 -d -o testpr1 testpr1.o userlib.o
-./loadFile testpr1
+ld86 -d -o kernel kernel_c.o userlib.o
+./loadFile shell
