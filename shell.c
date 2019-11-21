@@ -5,6 +5,7 @@ main(){
     char buffer[13312];
     int i = 5;
     int j = 0;
+    int sectorsRead;
 
     //Shell in the command line
     syscall(0,"A:>");
