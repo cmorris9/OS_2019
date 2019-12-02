@@ -1,41 +1,65 @@
+// shell
+
+
 main(){
-    
-    char line[80];
-    char command [10];
-    char buffer[13312];
-    int i = 5;
-    int j = 0;
 
-    //Shell in the command line
-    syscall(0,"A:>");
-    //user input
-    syscall(1, line);
+char commandIn[80];
+char fileName[6];
+int i;
+char buffer[13312];
+int sectorsRead;
+char dir[512];
+int j;
+char* dirFileName;
 
-        //if the user uses type or exec
-        if((line[0]=='t' && line[1] == 'y'&& line[2] == 'p' && line[3] == 'e') ||
-        (line[0]=='e' && line[1] == 'x'&& line[2] == 'e'&& line[3] == 'c')){
-            while(line[i] !='\0')
-            {command[j] = line[i];
-            i++;
-            j++;
-            }
-            if(line[0]=='t' && line[1] == 'y'&& line[2] == 'p' && line[3] == 'e'){
-                syscall(3,command,buffer,&sectorsRead);
-                if(sectorsRead > 0){
-                    syscall(0,buffer);
-                }
-                else{
-                    syscall(0, "No file found\n\r");
-                }
-            }
-            if(line[0]=='e' && line[1] == 'x'&& line[2] == 'e' && line[3] == 'c'){
-                syscall(4,command);
-                    syscall(0,"No file found\n\r");
-            }
+for(;;){
+	syscall(0,"SHELL>");
+	syscall(1,commandIn);
+	//syscall(0,commandIn);
 
-        }
-        else{syscall(0,"Cmd wrong");}
+	if(commandIn[0] == 't' && commandIn[1] == 'y' && commandIn[2] == 'p' && commandIn[3] == 'e'){
+		for(i = 0; i <6; i++) {
+			fileName[i] = commandIn[i+5];
+				}
+		syscall(3,fileName,buffer, &sectorsRead);
+			if(sectorsRead > 0){
+				syscall(0,buffer);	}
+			else{  syscall(0,"file not found");
+			}}
+			
+	else if(commandIn[0] == 'e' && commandIn[1] == 'x' && commandIn[2] == 'e' && commandIn[3] == 'c'){
+		for(i = 0; i <6; i++) {
+			fileName[i] = commandIn[i+5];
+				}
+		syscall(4,fileName);}
 
+	else if(commandIn[0] == 'd' && commandIn[1] == 'i' && commandIn[2] == 'r') {
+		syscall(2,dir,2);
 
-    
+		for(j=0; j<512; j = j + 32){
+			if(dir[j] != '\0'){
+			
+			
+			syscall(69,dir[j]);
+			syscall(69,dir[j+1]);
+			syscall(69,dir[j+2]);
+			syscall(69,dir[j+3]);
+			syscall(69,dir[j+4]);
+			syscall(69,dir[j+5]);
+			syscall(0,"\n");
 }
+		}
+		}
+	else if(commandIn[0] == 'd' && commandIn[1] == 'e' && commandIn[2] == 'l') {
+
+		for(i = 0; i <6; i++) {
+			fileName[i] = commandIn[i+4];	}	
+
+	
+		syscall(7,fileName);   }
+
+	else{
+		syscall(0,"Bad Command");}
+		}
+	}
+

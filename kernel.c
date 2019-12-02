@@ -4,6 +4,11 @@ void readSector(char*, int);
 void makeInterrupt21(int,int,int,int);
 void readFile(char*, char*, int*);
 void executeProgram(char*);
+void terminate();
+void writeSector(char*, int);
+void deleteFile(char*);
+void printChar(char*);
+void writeFile(char*, char*, int);
 
 void main() {
 	int startVidMem = 0xb800;
@@ -48,10 +53,17 @@ void main() {
 			//while(1);
 
 		makeInterrupt21();
-		interrupt(0x21,4,"testpr",0,0);
-		while(1);
+		//interrupt(0x21,4,"testpr",0,0);
+		//interrupt(0x21,4,"tstpr2",0,0);
+		interrupt(0x21,8,"this is a test message","testmg",3);
+		interrupt(0x21,4,"shell",0,0);
+		//while(1);
 }
 
+
+void printChar(char* c) {
+	char character = c;
+	interrupt(0x10, 0xe*256+character, 0, 0, 0);    }
 
 void printString(char* chars)
 { 
@@ -141,6 +153,21 @@ void readString(char* lineLocal)
 		else if(ax == 4) {
 			executeProgram(bx);
 			}
+		else if(ax == 5) {
+			terminate();
+			}
+		else if(ax == 6) {
+			writeSector(bx,cx);
+			}
+		else if(ax == 7) {
+			deleteFile(bx);
+			}
+		else if(ax == 69){
+			printChar(bx);
+			}
+		else if(ax == 8) {
+			writeFile(bx,cx,dx);
+			}
 		else { 
 			printString("error");
 	}}
@@ -151,6 +178,7 @@ void readString(char* lineLocal)
 		int fileEntry;
 		int i = 0;
 		int j = 0;
+		int bufferSize = 0;
 		char fileBuffer[512];
 		readSector(fileBuffer, 2);
 		
@@ -197,4 +225,119 @@ void readString(char* lineLocal)
 		launchProgram(0x2000);
 			
 			}
+
+	void terminate()
+	{
+		char shell[6];
+		
+		shell[0] = "s";
+		shell[1] = "h";
+		shell[2] = "e";
+		shell[3] = "l";
+		shell[4] = "l";
+		shell[5] = "\0";
+	
+		executeProgram(shell);
+	}
+
+
+	void writeSector(char* buffer, int sector) {
+		
+		char al = 1;
+		char ah = 3;
+		char ch = 0;
+		char cl = sector + 1;
+		char dh = 0;
+		char dl = 0x80;
+		int ax = ah*256+al;
+		int cx = ch*256+cl;
+		int dx = dh*256+dl;
+		interrupt(0x13,ax,buffer,cx,dx);
+
+		}
+
+
+	void deleteFile(char* fileName){
+		
+		int i;
+		int j;
+		char dir[512];
+		char map[512];
+		int sector;
+		readSector(dir,2);
+		readSector(map,1);
+
+		for(i=0; i<512; i = i + 32) {
+			
+			if(dir[i] == fileName[0] && dir[i+1] == fileName[1] && dir[i+2] == fileName[2] && dir[i+3] == fileName[3] && dir[i+4] == fileName[4] && dir[i+5] == fileName[5]) {
+			dir[i] = '\0';
+			for(j=6;j<16;j++){
+				sector = dir[i+j];		
+				map[sector] = 0;} }
+			
+					break;		}
+				
+			writeSector(dir,2);
+			writeSector(map,1);
+
+}
+
+
+	void writeFile(char* buffer, char* filename, int numberOfSectors) {
+		
+		int i;
+		int j;
+		int k;
+		int l;
+		int start;
+		int end;
+		int entry;
+		int sector;
+		int sectorsRead;
+		char dir[512];
+		char map[512];
+		readSector(dir,2);
+		readSector(map,1);
+	
+		for(i=0; i<512; i = i + 32) {
+			if(dir[i] == '\0') {
+				dir[i] = filename[0];
+				dir[i+1] = filename[1];
+				dir[i+2] = filename[2];
+				dir[i+3] = filename[3];
+				dir[i+4] = filename[4];
+				dir[i+5] = filename[5];
+				entry = i/32;
+				break;
+
+		} }
+
+		for(j=4; j<512; j++) {
+			if(map[j] == 0) {
+				map[j] = 0xFF;
+				sector = j;
+			}
+			break;
+
+			}
+		dir[entry*32+6] = sector;
+		
+		//remember to fix this to accomadate files larger than 512
+		readFile(buffer,&sectorsRead);
+		
+		writeSector(buffer,sector);
+		
+		start = entry*32+7;
+		end = entry*32+32;
+		
+		for(k = start; k<end; k++) {
+			dir[k] = 0;}
+		
+		writeSector(dir,2);
+		writeSector(map,1);
+		}
+			
+
+
+
 
