@@ -9,6 +9,7 @@ void writeSector(char*, int);
 void deleteFile(char*);
 void printChar(char*);
 void writeFile(char*, char*, int);
+void writeFile(char*, char*, int )
 
 void main() {
 	int startVidMem = 0xb800;
