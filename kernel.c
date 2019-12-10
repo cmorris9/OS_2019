@@ -336,6 +336,139 @@ void readString(char* lineLocal)
 		writeSector(dir,2);
 		writeSector(map,1);
 		}
+
+	void handleTimerInterrupt(int segment, int sp)
+
+{
+
+	int i;
+
+	setKernelDataSegment();
+
+	if(finish==
+
+		restoreDataSegment();
+
+		returnFromTimer(segment, sp);
+
+	}
+
+	//setKernelDataSegment();
+
+ 	//printString("done reading, choose a segment to run ");
+
+	// restoreDataSegment();
+
+	if(segment==0x1000)
+
+	{
+
+		i=0;	
+
+		while(i=myMOD(i,8))
+
+        {
+
+			setKernelDataSegment();
+
+			if(ProcessTable[i][0]==1)//check if there is any active processes
+
+			{
+
+				CurrentProcess=i;//save the number of the process
+
+				sp=ProcessTable[i][1];//set the sp to sp value of the next active process
+
+				restoreDataSegment();
+
+				break;
+
+			}
+
+			i++;
+
+        }
+
+        setKernelDataSegment();
+
+        segment=(CurrentProcess*0x1000)+0x2000;
+
+        restoreDataSegment();
+
+	}
+
+	else
+	   {
+
+		setKernelDataSegment();
+
+		ProcessTable[CurrentProcess][1]=sp;
+
+		i=CurrentProcess;
+
+        restoreDataSegment();
+
+		
+
+		i++;//move to the next process
+
+		while(i=myMOD(i,8))
+
+		{
+
+			setKernelDataSegment();
+
+			if(ProcessTable[i][0]==1)//check if there is any processes
+
+			{
+
+				CurrentProcess=i;//save process
+
+				sp=ProcessTable[i][1];//set the sp to sp value of the next process
+
+				restoreDataSegment();
+
+				break;
+
+			}
+
+			i++;
+
+		}
+
+        setKernelDataSegment();
+
+		segment=(CurrentProcess*0x1000)+0x2000;
+
+		restoreDataSegment();
+
+	}
+
+	//setKernelDataSegment();
+
+	//printString("done choosing a segment ");
+
+	//restoreDataSegment();
+
+	//      interrupt(0x21,0,"Tic",0,0);
+
+	
+
+	if (segment == 0x1000) { putInMemory(0xB000, 0x8162, 'K'); putInMemory(0xB000, 0x8163, 0x7);
+
+	}
+
+	else if (segment == 0x2000) {
+
+		putInMemory(0xB000, 0x8164, '0');
+
+		putInMemory(0xB000, 0x8165, 0x7); }
+
+	
+
+	returnFromTimer(segment, sp);
+
+}
 			
 
 
