@@ -6,6 +6,7 @@
 ;userlib.asm contains assembly functions for user programs such as shell
 
 	.global _syscall
+	.global _enableInterrupts
 
 ;void syscall (int AX, int BX, int CX, int DX)
 _syscall:
@@ -19,3 +20,8 @@ _syscall:
 	pop bp
 	ret
 
+;void enableInterrupts()
+;call at the beginning of programs.  allows timer preemption
+_enableInterrupts:
+	sti
+	ret
