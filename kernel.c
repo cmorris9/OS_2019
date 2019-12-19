@@ -14,31 +14,30 @@ void createFile(char*, char*);
 void handleTimerInterrupt(int, int);
 void returnFromTimer(int, int);
 
-int processActive[8];
-int processStackPointer[8];
-int currentProcess;
+//Can just set this to -1 here instead of in main
+
+int currentProcess = -1;
 int dataseg;
 
 void main() {
-	int startVidMem = 0xb800;
-	int vidMemOffset = 0x0;
-	int white = 0x7;
-	char* letters = "Sean Shea\0";
-	char* line[80];
-	
-	int sectorsRead;
-	char bufferC[13312];
+        int startVidMem = 0xb800;
+        int vidMemOffset = 0x0;
+        int white = 0x7;
+        char* letters = "Sean Shea\0";
+        char* line[80];
 
-	
-	int i;
-	
-	
-	for(i=0;i<8;i++) {
-		processActive[i] = 0;	
-		processStackPointer[i] = 0xff00;
-		currentProcess = -1;	
-			}
-	
+        int sectorsRead;
+        char bufferC[13312];
+
+
+        //int i;
+        int x;
+        for(x = 0; x<8; x++)
+        {
+                processActive[x] = 0;
+                processStackPointer[x] = 0xff00;
+        }
+
 		
 
 
