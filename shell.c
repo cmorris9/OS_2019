@@ -19,6 +19,7 @@ char* dirFileName;
 
 
 for(;;){
+	enableInterrupts();
 	syscall(0,"SHELL>");
 	syscall(1,commandIn);
 	//syscall(0,commandIn);

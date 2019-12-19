@@ -13,11 +13,15 @@ void copyFile(char*, char*);
 void createFile(char*, char*);
 void handleTimerInterrupt(int, int);
 void returnFromTimer(int, int);
+void killProcess(char*);
+
+//also declare these here maybe? -c
+int processActive[8], processStackPointer[8];
 
 //Can just set this to -1 here instead of in main
 
 int currentProcess = -1;
-int dataseg;
+//int dataseg;
 
 void main() {
         int startVidMem = 0xb800;
@@ -34,7 +38,7 @@ void main() {
         int x;
         for(x = 0; x<8; x++)
         {
-                processActive[x] = 0;
+                processActive[x] = 0x0;
                 processStackPointer[x] = 0xff00;
         }
 
@@ -75,7 +79,7 @@ void main() {
 		makeInterrupt21();
 		//interrupt(0x21,4,"testpr",0,0);
 		//interrupt(0x21,4,"tstpr2",0,0);
-		interrupt(0x21,8,"this is a test message","testmg",3);
+		//interrupt(0x21,8,"this is a test message","testmg",3);
 		
 		interrupt(0x21,4,"shell",0,0);
 		makeTimerInterrupt();
@@ -191,7 +195,8 @@ void readString(char* lineLocal)
 			writeFile(bx,cx,dx);
 			}
 		else if(ax == 9) {
-			copyFile(bx,cx,dx);
+			killProcess(bx);
+		//	copyFile(bx,cx,dx);
 			}
 		else if(ax == 10) {
 			createFile(bx);
@@ -237,16 +242,45 @@ void readString(char* lineLocal)
 }}
 }
 
-	void executeProgram(char* name) {
+void executeProgram(char* name) 
+{
 
-		char bufferX[13312];
-		int sectorsRead;
-		int i;
-		int segment;
-		//int dataseg;
+	char bufferX[13312];
+	int sectorsRead;
+	int i;
+	//int segment;
+	//int dataseg;
+	int i, k, =segment, dataseg, 0;
 	
 
-		readFile(name, bufferX, &sectorsRead);
+	readFile(name, bufferX, &sectorsRead);
+		
+
+        dataseg = setKernelDataSegment();
+ 	for(i =0; i < 8; i++)
+    	{
+      		if(processActive[i] == 0x0)
+		{
+	  		segment = i;
+	  		break;
+		}
+    	}
+  	restoreDataSegment(dataseg);  
+
+  	segment = (segment+2)*0x1000;
+
+  	for(k = 0; k < 13312; k++)
+    	{
+      		putInMemory(segment,offset+k,bufferX[k]);
+    	}
+ 
+  	initializeProgram(segment);
+  	dataseg = setKernelDataSegment();
+ 	processActive[i] = 1;
+  	processStackPointer[i] = 0xff00;
+  	restoreDataSegment(dataseg);
+}
+/*
 		dataseg = setKernelDataSegment();
 		for(i=0;i<8;i++) {
 			
@@ -265,7 +299,7 @@ void readString(char* lineLocal)
 				}
 			}
 			restoreDataSegment(dataseg);}
-
+*/
 	void terminate()
 	{
 		char shell[6];
@@ -417,24 +451,77 @@ void readString(char* lineLocal)
 
 
 	
-	void handleTimerInterrupt(int segment, int sp) {
+void killProcess(char* process)
+{
+  int dataseg;
+  int currentProcess = process[0] - '0';
+  
+  dataseg = setKernelDataSegment();
+  processActive[currentProcess] = 0;
+  processStackPointer[currentProcess] = 0;
+  restoreDataSegment(dataseg);
+}
+
+
+
+
+void handleTimerInterrupt(int segment, int sp) {
+
+
 
 		//printChar('T');
 		//printChar('i');
 		//printChar('c');
-		dataseg = setKernelDataSegment();
-		if(currentProcess != -1){
-		processStackPointer[currentProcess] = sp;}
-	for(;;){
-		currentProcess +=1;
-		currentProcess = currentProcess % 8;
-		if(processActive[currentProcess] == 1) {
-			break;}}
+		//dataseg = setKernelDataSegment();
+		//if(currentProcess != -1){
+		//processStackPointer[currentProcess] = sp;}
+	//for(;;){
+		//currentProcess +=1;
+		//currentProcess = currentProcess % 8;
+		//if(processActive[currentProcess] == 1) {
+			//break;}}
 		//maybe another break?
-		restoreDataSegment(dataseg);
-****
-		returnFromTimer(segment, sp);
+		//restoreDataSegment(dataseg);
+
+		//returnFromTimer(segment, sp);
+
+	int dataseg,i;
+    
+  	dataseg = setKernelDataSegment();
+  	for(i = 0; i < 8;i++)
+    	{
+      	putInMemory(0xb800,60*2+i*4,i+0x30);
+      	if(processActive[i]==1)
+		putInMemory(0xb800,60*2+i*4+1,0x20);
+      	else
+		putInMemory(0xb800,60*2+i*4+1,0);
+    	}
+  
+  	if(currentProcess != -1)
+    	{
+      	processStackPointer[currentProcess] = sp;
+    	}
+
+  	while(1)
+    	{
+      		currentProcess = currentProcess + 1;
+      		if(currentProcess >= 8)
+		{
+	  		currentProcess = 0;
 		}
+      		if(processActive[currentProcess] == 1)
+		{
+	  		break;
+		}
+    	}
+  	segment = (currentProcess+2)*0x1000;
+  	sp = processStackPointer[currentProcess];
+  	restoreDataSegment(dataseg);
+  	returnFromTimer(segment, sp);
+
+}
+
+		
 
 	
 	

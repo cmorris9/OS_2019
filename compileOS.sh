@@ -7,11 +7,9 @@ ld86 -o kernel -d kernel_c.o kernel_asm.o
 ./loadFile kernel
 
 dd if=messag.txt of=diskc.img bs=512 count=1 seek=30 conv=notrunc
-./loadFile messag.txt
 
-
-./loadFile tstpr2
-
+./loadfile number.c
+./loadfile letter.c
 
 bcc -ansi -c -o shell_c.o shell.c
 as86 userlib.asm -o userlib_asm.o
